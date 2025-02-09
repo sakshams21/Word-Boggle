@@ -11,6 +11,8 @@ public class GameManager : MonoBehaviour
     private Dictionary<string, int> _wordDictionary = new Dictionary<string, int>();
     private Dictionary<string, int> _usedWordDictionary = new Dictionary<string, int>();
 
+    private List<int> InteractedTiles;
+
     void Awake()
     {
         if (Instance == null)
@@ -25,6 +27,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
+
+    #region Word Manager
+
+
     private void LoadWords()
     {
         _wordList = WordData_TextFile.text.Split(new[] { '\n', '\r' }, System.StringSplitOptions.RemoveEmptyEntries);
@@ -34,9 +40,10 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public bool isWordValid(string word)
+    public bool IsWordValid(string word)
     {
         return _wordDictionary.ContainsKey(word);
+        //add the word to the usedone so its not picked
     }
 
     public string PickRandomWord()
@@ -47,9 +54,34 @@ public class GameManager : MonoBehaviour
         {
             randomIndex = Random.Range(0, _wordDictionary.Count);
         }
-
-        _usedWordDictionary[word] = _usedWordDictionary.Count;
         return _wordList[randomIndex];
     }
+    #endregion
+
+    #region Tile Manager
+
+    public void StartTile(int id)
+    {
+        InteractedTiles.Clear();
+        InteractedTiles.Add(id);
+    }
+
+    public void AddTile(int id)
+    {
+        if (!InteractedTiles.Contains(id))
+        {
+            InteractedTiles.Add(id);
+        }
+
+    }
+
+    public void EndTile()
+    {
+        Debug.Log("Tiles touched: " + string.Join(", ", InteractedTiles));
+    }
+
+    #endregion
+
+
 
 }

@@ -10,16 +10,16 @@ public class Tile : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, IP
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        throw new System.NotImplementedException();
+        GameManager.Instance.StartTile(TileId);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        throw new System.NotImplementedException();
+        GameManager.Instance.AddTile(TileId);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        throw new System.NotImplementedException();
+        GameManager.Instance.EndTile();
     }
 }
