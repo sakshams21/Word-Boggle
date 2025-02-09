@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,16 +6,25 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
+    public TileManager Ref_TileManager;
+    public UserInterfaceManager Ref_UserInterfaceManager;
+
     [SerializeField] private TextAsset WordData_TextFile;
+
+    public event Action OnProcessEnd;
+
 
     private string[] _wordList;
     private Dictionary<string, int> _wordDictionary = new Dictionary<string, int>();
     private Dictionary<string, int> _usedWordDictionary = new Dictionary<string, int>();
 
-    private List<int> InteractedTiles;
+    public bool IsDragging = true;
+    public bool IsProcessingWord = false;
 
-    void Awake()
+
+    private void Awake()
     {
+        IsProcessingWord = false;
         if (Instance == null)
         {
             Instance = this;
@@ -48,39 +58,29 @@ public class GameManager : MonoBehaviour
 
     public string PickRandomWord()
     {
-        int randomIndex = Random.Range(0, _wordDictionary.Count);
+        int randomIndex = UnityEngine.Random.Range(0, _wordDictionary.Count);
         string word = _wordList[randomIndex];
         while (_usedWordDictionary.ContainsKey(_wordList[randomIndex]))
         {
-            randomIndex = Random.Range(0, _wordDictionary.Count);
+            randomIndex = UnityEngine.Random.Range(0, _wordDictionary.Count);
         }
         return _wordList[randomIndex];
     }
     #endregion
 
-    #region Tile Manager
 
-    public void StartTile(int id)
+    public void ProcessWord_Start()
     {
-        InteractedTiles.Clear();
-        InteractedTiles.Add(id);
+        Ref_TileManager.EndTile();
+        IsProcessingWord = true;
+        Invoke(nameof(ProcessWord_End), 2f);
     }
 
-    public void AddTile(int id)
+    public void ProcessWord_End()
     {
-        if (!InteractedTiles.Contains(id))
-        {
-            InteractedTiles.Add(id);
-        }
-
+        IsProcessingWord = false;
+        OnProcessEnd?.Invoke();
     }
-
-    public void EndTile()
-    {
-        Debug.Log("Tiles touched: " + string.Join(", ", InteractedTiles));
-    }
-
-    #endregion
 
 
 
