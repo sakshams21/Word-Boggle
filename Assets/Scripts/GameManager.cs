@@ -42,11 +42,13 @@ public class GameManager : MonoBehaviour
     public string PickRandomWord()
     {
         int randomIndex = Random.Range(0, _wordDictionary.Count);
+        string word = _wordList[randomIndex];
         while (_usedWordDictionary.ContainsKey(_wordList[randomIndex]))
         {
             randomIndex = Random.Range(0, _wordDictionary.Count);
         }
 
+        _usedWordDictionary[word] = _usedWordDictionary.Count;
         return _wordList[randomIndex];
     }
 
