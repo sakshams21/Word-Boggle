@@ -17,8 +17,10 @@ public class TileScript : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
     private bool _bonus;
     private bool _blocked;
 
-    public (int x, int y) TilePos;
+    public Vector2Int TilePos;
+
     public int index;
+    public bool IsAvailable;
 
     private void Start()
     {
@@ -70,9 +72,9 @@ public class TileScript : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
         Blocked_Go.SetActive(false);
     }
 
-    public void SetLetter(char c)
+    public void SetLetter(string str)
     {
-        Letter_Text.text = c.ToString();
+        Letter_Text.text = str;
     }
 
     public string GetLetter()
