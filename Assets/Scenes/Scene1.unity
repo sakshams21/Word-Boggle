@@ -1282,6 +1282,8 @@ MonoBehaviour:
   - {fileID: 1255092438}
   - {fileID: 544470349}
   - {fileID: 645675591}
+  startingPos_TEST: {x: 3, y: 1}
+  WORD_TEST: ABCDE
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0

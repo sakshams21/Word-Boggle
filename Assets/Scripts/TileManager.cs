@@ -14,6 +14,9 @@ public class TileManager : MonoBehaviour
 
     private List<int> _interactedTiles = new();
 
+    public Vector2Int startingPos_TEST;
+    public string WORD_TEST;
+
     private void Awake()
     {
         MapToPositionToTiles();
@@ -63,7 +66,7 @@ public class TileManager : MonoBehaviour
     }
 
 
-    [ContextMenu("test")]
+    [EasyButtons.Button]
     public void PlaceRandomWord()
     {
         string randomWord = GameManager.Instance.PickRandomWord();
@@ -78,7 +81,7 @@ public class TileManager : MonoBehaviour
         // print("Start Tile:" + startPos.x + ":" + startPos.y);
         Tiles_Go[randomTileIndex].IsAvailable = false;
         int randomDirection = Random.Range(0, 4);//0:right, 1:top, 2:left , 3:down
-        print("CAN? :" + CanPlaceWord(ref randomWord, startPos, randomDirection));
+        print("CAN? :" + CanPlaceWord2(ref WORD_TEST, startingPos_TEST, randomDirection));
         // int wordLength = randomWord.Length;
         // while (wordLength > 0)
         // {
@@ -140,34 +143,58 @@ public class TileManager : MonoBehaviour
         return true;
     }
 
-    private bool CanPlaceWord2(ref string word, Vector2Int startPo, int initialDirection)
+    private bool CanPlaceWord2(ref string word, Vector2Int startPo, int direction)
     {
-        int intial = initialDirection;
-        //4 is used because i am taking only 4 directions for now, can be changed to 8 if counting all the diagonal directions
+        int intial = direction;
 
-        int increament_x = (initialDirection == 0) ? 1 : (initialDirection == 2) ? -1 : 0;
-        int increament_y = (initialDirection == 1) ? -1 : (initialDirection == 3) ? 1 : 0;
+        int increament_x = (direction == 0) ? 1 : (direction == 2) ? -1 : 0;
+        int increament_y = (direction == 1) ? -1 : (direction == 3) ? 1 : 0;
         int remainingWord = word.Length;
         int count = 0;
         List<Vector2Int> path = new();
         Vector2Int newPos = Vector2Int.zero;
+        int maxTries = 20;
 
-        while (remainingWord > 1)
+        print($"Starting Path:({startPo})");
+
+        while (remainingWord >= 1)
         {
+            if (maxTries <= 0)
+            {
+                Debug.Log("PATH= " + string.Join(", ", path));
+                return false;
+            }
+
             newPos.x = startPo.x + increament_x * count;
             newPos.y = startPo.y + increament_y * count;
 
-            if (newPos.x < 0 || newPos.x >= 4 || newPos.y < 0 || newPos.y >= 4 || UsedTiles.ContainsKey(newPos))
+            if (newPos.x < 0 || newPos.x >= 4 || newPos.y < 0 || newPos.y >= 4 || UsedTiles.ContainsKey(newPos) || path.Contains(newPos))
             {
+                //one step backward
+                startPo.x = startPo.x + increament_x * (count - 1);
+                startPo.y = startPo.y + increament_y * (count - 1);
 
+                //change direction
+                direction = CycleValue(direction++, 0, 3);
+                print("direction Change: " + direction);
+
+                //change direction modifiers
+                increament_x = (direction == 0) ? 1 : (direction == 2) ? -1 : 0;
+                increament_y = (direction == 1) ? -1 : (direction == 3) ? 1 : 0;
+
+                count = 1;
             }
             else
             {
-                path.Add(newPos)
+                count++;
+                path.Add(newPos);
+                remainingWord--;
             }
-
+            maxTries--;
         }
-        return true;
+
+        Debug.Log("PATH= " + string.Join(", ", path));
+        return false;
     }
 
     private void PlaceWord(ref string word, Vector2Int startPo, int direction, int noOfSteps)
