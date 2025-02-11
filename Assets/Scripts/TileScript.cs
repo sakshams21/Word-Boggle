@@ -35,7 +35,7 @@ public class TileScript : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
     #region Pointer Handlers
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (_blocked || GameManager_Endless.Instance.IsProcessingWord) return;
+        if (_blocked || GameManagerBase.BaseInstance.IsProcessingWord) return;
 
         Selected(true);
         GameManagerBase.BaseInstance.Ref_TileManager.StartTile(TilePos, index);
@@ -44,7 +44,7 @@ public class TileScript : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (_blocked || GameManager_Endless.Instance.IsProcessingWord) return;
+        if (_blocked || GameManagerBase.BaseInstance.IsProcessingWord) return;
 
         Selected(true);
         GameManagerBase.BaseInstance.Ref_TileManager.AddTile(TilePos, index);
