@@ -5,22 +5,34 @@ using UnityEditor.Experimental.GraphView;
 using UnityEditor.Search;
 using UnityEngine;
 using Random = UnityEngine.Random;
-public class TileManager : MonoBehaviour
+public class EndlessTileManager : TileManagerBase
 {
     [SerializeField] protected TileScript[] Tiles_Go;
 
-    protected Dictionary<Vector2Int, TileScript> TilesData = new();
-    protected Dictionary<Vector2Int, TileScript> UsedTiles = new();
+    private Dictionary<Vector2Int, TileScript> _tilesData = new();
+    private Dictionary<Vector2Int, TileScript> _usedTiles = new();
 
-    protected virtual void Initial()
+    private void Start()
     {
-        GameManager.Instance.OnProcessEnd += ResetSelection;
+        GameManager_Endless.Instance.OnProcessEnd += ResetSelection;
+        GameManager_Endless.Instance.OnWordCheckSuccess += AfterWordCheck;
     }
 
 
-    protected virtual void Disable()
+    private void OnDisable()
     {
-        GameManager.Instance.OnProcessEnd -= ResetSelection;
+        GameManager_Endless.Instance.OnProcessEnd -= ResetSelection;
+        GameManager_Endless.Instance.OnWordCheckSuccess -= AfterWordCheck;
+    }
+
+    private void AfterWordCheck()
+    {
+        //replace all letters with new one
+        foreach (KeyValuePair<Vector2Int, TileScript> item in _usedTiles)
+        {
+            item.Value.SetScore(Random.Range(0, 3));
+            item.Value.SetLetter(((char)('A' + Random.Range(0, 26))).ToString());
+        }
     }
 
     public void MapToPositionToTiles()
@@ -35,7 +47,7 @@ public class TileManager : MonoBehaviour
                 Tiles_Go[count].IsAvailable = true;
                 Tiles_Go[count].SetScore(Random.Range(0, 3));
                 Tiles_Go[count].SetLetter(((char)('A' + Random.Range(0, 26))).ToString());
-                TilesData[new Vector2Int(x, y)] = Tiles_Go[count];
+                _tilesData[new Vector2Int(x, y)] = Tiles_Go[count];
                 count++;
             }
         }
@@ -49,22 +61,22 @@ public class TileManager : MonoBehaviour
 
     #region User Interacted Methods
 
-    public void StartTile(Vector2Int pos, int index)
+    public override void StartTile(Vector2Int pos, int index)
     {
-        UsedTiles.Clear();
-        UsedTiles.TryAdd(pos, Tiles_Go[index]);
+        _usedTiles.Clear();
+        _usedTiles.TryAdd(pos, Tiles_Go[index]);
     }
 
-    public void AddTile(Vector2Int pos, int index)
+    public override void AddTile(Vector2Int pos, int index)
     {
-        UsedTiles.TryAdd(pos, Tiles_Go[index]);
+        _usedTiles.TryAdd(pos, Tiles_Go[index]);
     }
 
-    public void EndTile()
+    public override void EndTile()
     {
         string wordToCheck = "";
         int totalScoreOfWord = 0;
-        foreach (var item in UsedTiles)
+        foreach (var item in _usedTiles)
         {
             wordToCheck += item.Value.GetLetter();
             totalScoreOfWord += item.Value.ScoreValue;
@@ -73,30 +85,29 @@ public class TileManager : MonoBehaviour
         wordToCheck = wordToCheck.ToLower();
 
         //Check for validity of word
-        GameManager.Instance.WordExistenceCheck(ref wordToCheck, totalScoreOfWord);
+        GameManager_Endless.Instance.WordExistenceCheck(ref wordToCheck, totalScoreOfWord);
     }
 
 
 
     private void ResetSelection()
     {
-        UsedTiles.Clear();
+        _usedTiles.Clear();
     }
 
     #endregion
 
     #region Word Placement
     /// <summary>
-    /// Keep calling this method till we have atleast X words int the grid
+    /// Keep calling this method till we have at least X words int the grid
     /// where X will be the target for that level
     /// </summary>
     [Button]
-    public bool PlaceRandomWord()
+    private void PlaceRandomWord()
     {
+        string randomWord = GameManager_Endless.Instance.PickRandomWord().ToUpper();
 
-        string randomWord = GameManager.Instance.PickRandomWord().ToUpper();
-
-        if (!IsEnoughSpaceAvailableOnGrid(randomWord.Length)) return false;
+        if (!IsEnoughSpaceAvailableOnGrid(randomWord.Length)) return;
 
         int randomTileIndex;
         do { randomTileIndex = Random.Range(0, 16); }
@@ -109,15 +120,8 @@ public class TileManager : MonoBehaviour
         if (CanPlaceWordInGrid(ref randomWord, startPos, randomDirection, out List<Vector2Int> wordPath))
         {
             PlaceWordInGrid(ref randomWord, ref wordPath);
-            return true;
         }
-        else
-        {
-            return false;
-        }
-
     }
-
 
 
     /// <summary>
@@ -125,12 +129,13 @@ public class TileManager : MonoBehaviour
     /// </summary>
     /// <param name="word">the random word selected</param>
     /// <param name="startPo"></param>
-    /// <param name="initialDirection">0:right, 1:top, 2:left , 3:down(starts from right and goes anti clockwise)</param>
+    /// <param name="direction"></param>
+    /// <param name="path"></param>
     /// <returns></returns>
     private bool CanPlaceWordInGrid(ref string word, Vector2Int startPo, int direction, out List<Vector2Int> path)
     {
-        int increament_x = (direction == 0) ? 1 : (direction == 2) ? -1 : 0;
-        int increament_y = (direction == 1) ? -1 : (direction == 3) ? 1 : 0;
+        int incrementX = (direction == 0) ? 1 : (direction == 2) ? -1 : 0;
+        int incrementY = (direction == 1) ? -1 : (direction == 3) ? 1 : 0;
         int remainingWord = word.Length;
         int count = 0;
         Vector2Int newPos = Vector2Int.zero;
@@ -144,21 +149,21 @@ public class TileManager : MonoBehaviour
                 return false;
             }
 
-            newPos.x = startPo.x + increament_x * count;
-            newPos.y = startPo.y + increament_y * count;
+            newPos.x = startPo.x + incrementX * count;
+            newPos.y = startPo.y + incrementY * count;
 
-            if (newPos.x < 0 || newPos.x >= 4 || newPos.y < 0 || newPos.y >= 4 || UsedTiles.ContainsKey(newPos) || path.Contains(newPos))
+            if (newPos.x < 0 || newPos.x >= 4 || newPos.y < 0 || newPos.y >= 4 || _usedTiles.ContainsKey(newPos) || path.Contains(newPos))
             {
                 //one step backward
-                startPo.x = startPo.x + increament_x * (count - 1);
-                startPo.y = startPo.y + increament_y * (count - 1);
+                startPo.x += incrementX * (count - 1);
+                startPo.y += incrementY * (count - 1);
 
                 //change direction
-                direction = CycleValue(direction++, 0, 3);
+                direction = CycleValue(direction, 0, 3);
 
                 //change direction modifiers
-                increament_x = (direction == 0) ? 1 : (direction == 2) ? -1 : 0;
-                increament_y = (direction == 1) ? -1 : (direction == 3) ? 1 : 0;
+                incrementX = (direction == 0) ? 1 : (direction == 2) ? -1 : 0;
+                incrementY = (direction == 1) ? -1 : (direction == 3) ? 1 : 0;
 
                 count = 1;
             }
@@ -179,9 +184,9 @@ public class TileManager : MonoBehaviour
     {
         for (int i = 0; i < path.Count; i++)
         {
-            TilesData[path[i]].SetLetter(word[i].ToString());
-            UsedTiles.TryAdd(path[i], TilesData[path[i]]);
-            TilesData[path[i]].IsAvailable = false;
+            _tilesData[path[i]].SetLetter(word[i].ToString());
+            _usedTiles.TryAdd(path[i], _tilesData[path[i]]);
+            _tilesData[path[i]].IsAvailable = false;
         }
     }
 
@@ -194,7 +199,7 @@ public class TileManager : MonoBehaviour
     private bool IsEnoughSpaceAvailableOnGrid(int wordCount)
     {
         int availCount = 0;
-        foreach (var item in Tiles_Go)
+        foreach (TileScript item in Tiles_Go)
         {
             if (item.IsAvailable)
             {

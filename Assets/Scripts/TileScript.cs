@@ -24,30 +24,30 @@ public class TileScript : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 
     private void Start()
     {
-        GameManager.Instance.OnProcessEnd += ResetSelection;
+        GameManagerBase.BaseInstance.OnProcessEnd += ResetSelection;
     }
 
     private void OnDestroy()
     {
-        GameManager.Instance.OnProcessEnd -= ResetSelection;
+        GameManagerBase.BaseInstance.OnProcessEnd -= ResetSelection;
     }
 
     #region Pointer Handlers
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (_blocked || GameManager.Instance.IsProcessingWord) return;
+        if (_blocked || GameManager_Endless.Instance.IsProcessingWord) return;
 
         Selected(true);
-        GameManager.Instance.Ref_TileManager.StartTile(TilePos, index);
+        GameManagerBase.BaseInstance.Ref_TileManager.StartTile(TilePos, index);
         print(TilePos.x + ":" + TilePos.y);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (_blocked || GameManager.Instance.IsProcessingWord) return;
+        if (_blocked || GameManager_Endless.Instance.IsProcessingWord) return;
 
         Selected(true);
-        GameManager.Instance.Ref_TileManager.AddTile(TilePos, index);
+        GameManagerBase.BaseInstance.Ref_TileManager.AddTile(TilePos, index);
         print(TilePos.x + ":" + TilePos.y);
     }
     #endregion
@@ -72,7 +72,7 @@ public class TileScript : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
         Blocked_Go.SetActive(false);
     }
 
-    public void ResetSelection()
+    private void ResetSelection()
     {
         Selected(false);
     }

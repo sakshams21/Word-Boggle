@@ -20,11 +20,16 @@ public class ParseLevelData : MonoBehaviour
         Data = JsonUtility.FromJson<Root>(LevelData_TextAsset.text);
     }
 
+    public LevelData GetLevelData(int index)
+    {
+        return Data.data[index];
+    } 
+
 }
 
 
 [Serializable]
-public class Datum
+public class LevelData
 {
     public int bugCount;
     public int wordCount;
@@ -32,22 +37,16 @@ public class Datum
     public int totalScore;
     public Vector2Int gridSize;
     public int levelType;
-    public List<GridDatum> gridData;
+    public List<TileData> gridData;
 }
 [Serializable]
-public class GridDatum
+public class TileData
 {
     public int tileType;
     public string letter;
 }
 [Serializable]
-public class GridSize
-{
-    public int x;
-    public int y;
-}
-[Serializable]
 public class Root
 {
-    public List<Datum> data;
+    public List<LevelData> data;
 }

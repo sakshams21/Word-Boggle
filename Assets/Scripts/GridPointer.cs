@@ -8,21 +8,21 @@ public class GridPointer : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (GameManager.Instance.IsProcessingWord) return;
-        GameManager.Instance.IsDragging = true;
+        if (GameManager_Endless.Instance.IsProcessingWord) return;
+        GameManager_Endless.Instance.IsDragging = true;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (GameManager.Instance.IsProcessingWord) return;
-        GameManager.Instance.IsDragging = false;
-        GameManager.Instance.ProcessWord_Start();
+        if (GameManager_Endless.Instance.IsProcessingWord) return;
+        GameManager_Endless.Instance.IsDragging = false;
+        GameManager_Endless.Instance.ProcessWord_Start();
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (GameManager.Instance.IsProcessingWord) return;
-        GameManager.Instance.IsDragging = false;
-        GameManager.Instance.ProcessWord_Start();
+        if (GameManager_Endless.Instance.IsProcessingWord) return;
+        GameManager_Endless.Instance.IsDragging = false;
+        GameManager_Endless.Instance.ProcessWord_Start();
     }
 }
