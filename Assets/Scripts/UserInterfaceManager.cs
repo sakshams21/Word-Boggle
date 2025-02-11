@@ -10,7 +10,13 @@ public class UserInterfaceManager : MonoBehaviour
     [SerializeField] private Button Pause_Button;
 
 
-    public void WordDisplay(string letter)
+    public void WordDisplay(ref string word, bool exists)
+    {
+        WordDisplay_Text.text = word;
+        WordDisplay_Text.color = exists ? Color.green : Color.red;
+    }
+
+    public void IncrementLetterDisplay(ref string letter)
     {
         WordDisplay_Text.text += letter;
     }
@@ -18,6 +24,15 @@ public class UserInterfaceManager : MonoBehaviour
     public void Reset_WordDisplay()
     {
         WordDisplay_Text.text = "";
+        WordDisplay_Text.color = Color.white;
     }
+
+    public void UpdateScore(int scoreToAdd)
+    {
+        Score_Text.text = $"SCORE: {scoreToAdd}";
+    }
+
+
+
 
 }

@@ -12,24 +12,24 @@ public class TileScript : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
     [SerializeField] private GameObject[] ScoreIndicators_Go;
     [SerializeField] private GameObject Bonus_Go;
     [SerializeField] private GameObject Blocked_Go;
-
-
-    private bool _bonus;
-    private bool _blocked;
-
     public Vector2Int TilePos;
 
-    public int index;
     public bool IsAvailable;
+    public int index;
+
+    public int ScoreValue { get; private set; }
+
+    private bool _blocked;
+    private bool _bonus;
 
     private void Start()
     {
-        GameManager.Instance.OnProcessEnd += Clear;
+        GameManager.Instance.OnProcessEnd += ResetSelection;
     }
 
     private void OnDestroy()
     {
-        GameManager.Instance.OnProcessEnd -= Clear;
+        GameManager.Instance.OnProcessEnd -= ResetSelection;
     }
 
     #region Pointer Handlers
@@ -72,6 +72,11 @@ public class TileScript : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
         Blocked_Go.SetActive(false);
     }
 
+    public void ResetSelection()
+    {
+        Selected(false);
+    }
+
     public void SetLetter(string str)
     {
         Letter_Text.text = str;
@@ -82,5 +87,13 @@ public class TileScript : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
         return Letter_Text.text;
     }
 
+    public void SetScore(int scoreValue)
+    {
+        ScoreValue = scoreValue;
+        for (int i = 0; i < scoreValue; i++)
+        {
+            ScoreIndicators_Go[i].SetActive(true);
+        }
+    }
 
 }
