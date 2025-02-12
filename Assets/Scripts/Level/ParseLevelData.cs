@@ -13,17 +13,20 @@ public class ParseLevelData : MonoBehaviour
     public Root Data;
 
     [Button]
-    private void Test()
+    private void Awake()
     {
-        // Debug.Log(LevelData_TextAsset.text);
-        // Data = JsonConvert.DeserializeObject<Root>(LevelData_TextAsset.text);
         Data = JsonUtility.FromJson<Root>(LevelData_TextAsset.text);
+    }
+
+    public int GetMaxLevel()
+    {
+        return Data.data.Count;
     }
 
     public LevelData GetLevelData(int index)
     {
         return Data.data[index];
-    } 
+    }
 
 }
 

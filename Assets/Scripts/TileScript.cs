@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -21,34 +19,43 @@ public class TileScript : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 
     private bool _blocked;
     private bool _bonus;
+    public bool Bonus
+    {
+        get { return _bonus; }
+        set
+        {
+            _bonus = value;
+            Bonus_Go.SetActive(value);
+        }
+    }
+
 
     private void Start()
     {
-        GameManagerBase.BaseInstance.OnProcessEnd += ResetSelection;
+        GameManager.Instance.OnProcessEnd += ResetSelection;
     }
 
     private void OnDestroy()
     {
-        GameManagerBase.BaseInstance.OnProcessEnd -= ResetSelection;
+        GameManager.Instance.OnProcessEnd -= ResetSelection;
     }
 
     #region Pointer Handlers
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (_blocked || GameManagerBase.BaseInstance.IsProcessingWord) return;
+        if (_blocked || GameManager.Instance.IsProcessingWord) return;
 
         Selected(true);
-        GameManagerBase.BaseInstance.Ref_TileManager.StartTile(TilePos, index);
-        print(TilePos.x + ":" + TilePos.y);
+        GameManager.Instance.Ref_TileManager.StartTile(TilePos, index);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (_blocked || GameManagerBase.BaseInstance.IsProcessingWord) return;
+        if (_blocked || GameManager.Instance.IsProcessingWord) return;
 
         Selected(true);
-        GameManagerBase.BaseInstance.Ref_TileManager.AddTile(TilePos, index);
-        print(TilePos.x + ":" + TilePos.y);
+        GameManager.Instance.Ref_TileManager.AddTile(TilePos, index);
+        ;
     }
     #endregion
 
@@ -92,7 +99,7 @@ public class TileScript : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
         ScoreValue = scoreValue;
         for (int i = 0; i < scoreValue; i++)
         {
-            ScoreIndicators_Go[i].SetActive(true);
+            ScoreIndicators_Go[i].SetActive(i <= scoreValue);
         }
     }
 

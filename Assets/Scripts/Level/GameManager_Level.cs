@@ -1,7 +1,7 @@
 namespace Level
 {
-    public class GameManager_Level: GameManagerBase
+    public class GameManager_Level : GameManager
     {
-        
+
     }
 }

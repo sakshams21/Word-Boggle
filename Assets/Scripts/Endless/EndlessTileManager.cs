@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using EasyButtons;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.Search;
 using UnityEngine;
 using Random = UnityEngine.Random;
 public class EndlessTileManager : TileManagerBase
@@ -14,15 +12,16 @@ public class EndlessTileManager : TileManagerBase
 
     private void Start()
     {
-        GameManager_Endless.Instance.OnProcessEnd += ResetSelection;
-        GameManager_Endless.Instance.OnWordCheckSuccess += AfterWordCheck;
+        GameManager.Instance.OnProcessEnd += ResetSelection;
+        GameManager.Instance.OnWordCheckSuccess += AfterWordCheck;
+        MapToPositionToTiles();
     }
 
 
     private void OnDisable()
     {
-        GameManager_Endless.Instance.OnProcessEnd -= ResetSelection;
-        GameManager_Endless.Instance.OnWordCheckSuccess -= AfterWordCheck;
+        GameManager.Instance.OnProcessEnd -= ResetSelection;
+        GameManager.Instance.OnWordCheckSuccess -= AfterWordCheck;
     }
 
     private void AfterWordCheck()
@@ -42,12 +41,13 @@ public class EndlessTileManager : TileManagerBase
         {
             for (int x = 0; x < 4; x++)
             {
-                Tiles_Go[count].TilePos = new(x, y);
-                Tiles_Go[count].index = count;
-                Tiles_Go[count].IsAvailable = true;
-                Tiles_Go[count].SetScore(Random.Range(0, 3));
-                Tiles_Go[count].SetLetter(((char)('A' + Random.Range(0, 26))).ToString());
-                _tilesData[new Vector2Int(x, y)] = Tiles_Go[count];
+                var item = Tiles_Go[count];
+                item.TilePos = new(x, y);
+                item.index = count;
+                item.IsAvailable = true;
+                item.SetScore(Random.Range(0, 3));
+                item.SetLetter(((char)('A' + Random.Range(0, 26))).ToString());
+                _tilesData[new Vector2Int(x, y)] = item;
                 count++;
             }
         }
@@ -57,6 +57,7 @@ public class EndlessTileManager : TileManagerBase
             PlaceRandomWord();
         }
 
+        GameManager.Instance.DisableLoadingScreen();
     }
 
     #region User Interacted Methods
@@ -82,10 +83,8 @@ public class EndlessTileManager : TileManagerBase
             totalScoreOfWord += item.Value.ScoreValue;
         }
 
-        wordToCheck = wordToCheck.ToLower();
-
         //Check for validity of word
-        GameManager_Endless.Instance.WordExistenceCheck(ref wordToCheck, totalScoreOfWord);
+        GameManager.Instance.WordExistenceCheck(ref wordToCheck, totalScoreOfWord, 0);
     }
 
 
@@ -105,7 +104,7 @@ public class EndlessTileManager : TileManagerBase
     [Button]
     private void PlaceRandomWord()
     {
-        string randomWord = GameManager_Endless.Instance.PickRandomWord().ToUpper();
+        string randomWord = GameManager.Instance.PickRandomWord();
 
         if (!IsEnoughSpaceAvailableOnGrid(randomWord.Length)) return;
 
