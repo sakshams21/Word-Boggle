@@ -21,8 +21,8 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
-    protected string[] WordList;
-    protected readonly Dictionary<string, int> WordDictionary = new Dictionary<string, int>();
+    private string[] _wordList;
+    private readonly Dictionary<string, int> _wordDictionary = new Dictionary<string, int>();
 
     private Dictionary<string, int> _usedRandomWordDictionary = new Dictionary<string, int>();
 
@@ -67,14 +67,14 @@ public class GameManager : MonoBehaviour
 
     #region Word Manager
 
-    protected void LoadWords()
+    private void LoadWords()
     {
-        WordList = WordData_TextFile.text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+        _wordList = WordData_TextFile.text.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
 
-        for (int i = 0; i < WordList.Length; i++)
+        for (int i = 0; i < _wordList.Length; i++)
         {
-            WordList[i] = WordList[i].Trim().ToUpper();
-            WordDictionary.TryAdd(WordList[i], i);
+            _wordList[i] = _wordList[i].Trim().ToUpper();
+            _wordDictionary.TryAdd(_wordList[i], i);
         }
     }
 
@@ -82,11 +82,12 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// Checks word in the dictionary and notifies the UI
     /// </summary>
-    /// <param name="word"></param>
-    /// <param name="wordScore"></param>
+    /// <param name="word">word to check on</param>
+    /// <param name="wordScore">total score of all the letters selected</param>
+    /// <param name="numOfBugs">total number of bugs found in the selected letters </param>
     public void WordExistenceCheck(ref string word, int wordScore, int numOfBugs)
     {
-        bool wordStatus = WordDictionary.ContainsKey(word) && !_usedWordDictionary.ContainsKey(word);
+        bool wordStatus = _wordDictionary.ContainsKey(word) && !_usedWordDictionary.ContainsKey(word);
         Ref_UserInterfaceManager.WordDisplay(ref word, wordStatus);
         //update UI for score
 
@@ -102,6 +103,9 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
+    /// <summary>
+    /// This method invokes after finger lift off from the screen
+    /// </summary>
 
     public void ProcessWord_Start()
     {
@@ -117,19 +121,22 @@ public class GameManager : MonoBehaviour
         Ref_UserInterfaceManager.Reset_WordDisplay();
     }
 
-
+    /// <summary>
+    /// Picks a random word which has not been used before
+    /// </summary>
     public string PickRandomWord()
     {
-        int randomIndex = UnityEngine.Random.Range(0, WordDictionary.Count);
-        while (_usedRandomWordDictionary.ContainsKey(WordList[randomIndex]))
+        int randomIndex = UnityEngine.Random.Range(0, _wordDictionary.Count);
+        while (_usedRandomWordDictionary.ContainsKey(_wordList[randomIndex]))
         {
-            randomIndex = UnityEngine.Random.Range(0, WordDictionary.Count);
+            randomIndex = UnityEngine.Random.Range(0, _wordDictionary.Count);
         }
 
-        _usedRandomWordDictionary.TryAdd(WordList[randomIndex], randomIndex);
-        return WordList[randomIndex];
+        _usedRandomWordDictionary.TryAdd(_wordList[randomIndex], randomIndex);
+        return _wordList[randomIndex];
     }
 
+    
     public void StartLoadingScreen()
     {
         Loading_Go.SetActive(true);

@@ -1,7 +1,0 @@
-namespace Level
-{
-    public class GameManager_Level : GameManager
-    {
-
-    }
-}
